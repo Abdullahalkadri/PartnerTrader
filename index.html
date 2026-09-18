@@ -27,6 +27,18 @@
     padding:16px;
   }
   .panel{max-width:480px;margin:0 auto;}
+  .lang-row{display:flex;justify-content:flex-end;gap:8px;margin-bottom:12px;}
+  .lang-btn{
+    padding:6px 14px;
+    border-radius:6px;
+    border:1px solid var(--border);
+    background:var(--card);
+    color:var(--muted);
+    font-size:13px;
+    font-weight:600;
+    cursor:pointer;
+  }
+  .lang-btn.active{background:var(--gold);color:var(--gold-text);border-color:var(--gold);}
   .header{
     font-size:13px;
     letter-spacing:1px;
@@ -80,6 +92,7 @@
     font-size:14px;
     cursor:pointer;
   }
+  html[dir="rtl"] .checkbox-row input{margin-left:8px;margin-right:0;}
   .checkbox-row input{margin-right:8px;width:16px;height:16px;}
   .btn{
     width:100%;
@@ -117,111 +130,213 @@
 </head>
 <body>
 <div class="panel">
-  <div class="header">Order Configuration &middot; <span id="symbolTitle">GOLD</span></div>
+  <div class="lang-row">
+    <button type="button" class="lang-btn" id="langEn">EN</button>
+    <button type="button" class="lang-btn" id="langAr">عربي</button>
+  </div>
+
+  <div class="header"><span data-i18n="header">Order Configuration</span> &middot; <span id="symbolTitle">GOLD</span></div>
 
   <div class="field">
-    <label>Instrument</label>
+    <label data-i18n="instrument">Instrument</label>
     <div class="toggle-row three-col">
-      <button type="button" class="toggle-btn active" data-group="instrument" data-value="XAUUSD">Gold</button>
+      <button type="button" class="toggle-btn active" data-group="instrument" data-value="XAUUSD" data-i18n="gold">Gold</button>
       <button type="button" class="toggle-btn" data-group="instrument" data-value="US100">US100</button>
-      <button type="button" class="toggle-btn" data-group="instrument" data-value="custom">Custom</button>
+      <button type="button" class="toggle-btn" data-group="instrument" data-value="custom" data-i18n="custom">Custom</button>
     </div>
   </div>
   <div class="field" id="customSymbolField" style="display:none;">
-    <label>Custom Instrument (send /findsymbol in the bot first to get the exact name)</label>
-    <input type="text" id="customSymbol" value="">
+    <label data-i18n="customInstrument">Custom Instrument (send /findsymbol in the bot first to get the exact name)</label>
+    <input type="text" id="customSymbol" value="" dir="ltr">
   </div>
 
   <div class="field">
-    <label>Order Type</label>
+    <label data-i18n="orderType">Order Type</label>
     <div class="toggle-row">
-      <button type="button" class="toggle-btn active" data-group="mode" data-value="market">Market Orders</button>
-      <button type="button" class="toggle-btn" data-group="mode" data-value="future">Future Orders</button>
+      <button type="button" class="toggle-btn active" data-group="mode" data-value="market" data-i18n="marketOrders">Market Orders</button>
+      <button type="button" class="toggle-btn" data-group="mode" data-value="future" data-i18n="futureOrders">Future Orders</button>
     </div>
   </div>
 
   <div class="field" id="futurePriceField" style="display:none;">
-    <label>Future Reference Price</label>
-    <input type="number" step="0.01" id="futureprice" value="0">
+    <label data-i18n="futureRefPrice">Future Reference Price</label>
+    <input type="number" step="0.01" id="futureprice" value="0" dir="ltr">
   </div>
 
   <div class="row-2">
-    <div class="field"><label>Buy Stops</label><input type="number" id="buystops" value="5"></div>
-    <div class="field"><label>Sell Stops</label><input type="number" id="sellstops" value="5"></div>
+    <div class="field"><label data-i18n="buyStops">Buy Stops</label><input type="number" id="buystops" value="5" dir="ltr"></div>
+    <div class="field"><label data-i18n="sellStops">Sell Stops</label><input type="number" id="sellstops" value="5" dir="ltr"></div>
   </div>
 
   <div class="row-2">
-    <div class="field"><label>First Order Distance ($)</label><input type="number" step="0.01" id="firstdistance" value="5"></div>
-    <div class="field"><label>Order Spacing ($)</label><input type="number" step="0.01" id="spacing" value="2"></div>
+    <div class="field"><label data-i18n="firstDistance">First Order Distance ($)</label><input type="number" step="0.01" id="firstdistance" value="5" dir="ltr"></div>
+    <div class="field"><label data-i18n="spacing">Order Spacing ($)</label><input type="number" step="0.01" id="spacing" value="2" dir="ltr"></div>
   </div>
 
   <div class="field">
-    <label>Position Size Mode</label>
+    <label data-i18n="sizingMode">Position Size Mode</label>
     <div class="toggle-row">
-      <button type="button" class="toggle-btn active" data-group="sizing" data-value="fixed">Fixed Lot</button>
-      <button type="button" class="toggle-btn" data-group="sizing" data-value="risk">Risk %</button>
+      <button type="button" class="toggle-btn active" data-group="sizing" data-value="fixed" data-i18n="fixedLot">Fixed Lot</button>
+      <button type="button" class="toggle-btn" data-group="sizing" data-value="risk" data-i18n="riskPct">Risk %</button>
     </div>
   </div>
 
   <div class="field" id="lotField">
-    <label>Lot Size</label>
-    <input type="number" step="0.01" id="lot" value="0.01">
+    <label data-i18n="lotSize">Lot Size</label>
+    <input type="number" step="0.01" id="lot" value="0.01" dir="ltr">
   </div>
   <div class="field" id="riskField" style="display:none;">
-    <label>Risk % per order</label>
-    <input type="number" step="0.1" id="risk" value="1">
+    <label data-i18n="riskPerOrder">Risk % per order</label>
+    <input type="number" step="0.1" id="risk" value="1" dir="ltr">
   </div>
 
   <div class="checkbox-row">
-    <label><input type="checkbox" id="noSl" checked> No Stop Loss</label>
+    <label><input type="checkbox" id="noSl" checked> <span data-i18n="noSl">No Stop Loss</span></label>
   </div>
   <div class="field" id="slField" style="display:none;">
-    <label>Stop Loss ($)</label>
-    <input type="number" step="0.01" id="slamount" value="5">
+    <label data-i18n="stopLoss">Stop Loss ($)</label>
+    <input type="number" step="0.01" id="slamount" value="5" dir="ltr">
   </div>
 
   <div class="checkbox-row">
-    <label><input type="checkbox" id="noTp" checked> No Take Profit</label>
+    <label><input type="checkbox" id="noTp" checked> <span data-i18n="noTp">No Take Profit</span></label>
   </div>
   <div class="field" id="tpField" style="display:none;">
-    <label>Take Profit ($)</label>
-    <input type="number" step="0.01" id="tpamount" value="5">
+    <label data-i18n="takeProfit">Take Profit ($)</label>
+    <input type="number" step="0.01" id="tpamount" value="5" dir="ltr">
   </div>
 
   <div class="field">
-    <label>Kill Switch: opposite-side trigger count</label>
-    <input type="number" step="1" id="killswitchcount" value="3">
+    <label data-i18n="killSwitch">Kill Switch: opposite-side trigger count</label>
+    <input type="number" step="1" id="killswitchcount" value="3" dir="ltr">
   </div>
 
-  <button class="btn btn-green" id="btnPlace">Place Orders</button>
+  <button class="btn btn-green" id="btnPlace" data-i18n="placeOrders">Place Orders</button>
 
   <div id="marketOnlyActions">
-    <button class="btn btn-red" id="btnCloseAll">Close All Trades</button>
+    <button class="btn btn-red" id="btnCloseAll" data-i18n="closeAll">Close All Trades</button>
 
     <div class="quick-actions">
-      <div class="quick-title">Quick Actions</div>
+      <div class="quick-title" data-i18n="quickActions">Quick Actions</div>
       <div class="quick-row">
-        <button class="btn-quick" id="btnCancelPending">Cancel Pending</button>
-        <button class="btn-quick" id="btnRecenter">Re-center Grid</button>
+        <button class="btn-quick" id="btnCancelPending" data-i18n="cancelPending">Cancel Pending</button>
+        <button class="btn-quick" id="btnRecenter" data-i18n="recenter">Re-center Grid</button>
       </div>
       <div class="quick-row" style="grid-template-columns:1fr 1fr 1fr;">
-        <button class="btn-quick" id="btnSecureBE">Breakeven</button>
-        <button class="btn-quick" id="btnSecure10">Lock 10%</button>
-        <button class="btn-quick" id="btnSecure30">Lock 30%</button>
+        <button class="btn-quick" id="btnSecureBE" data-i18n="breakeven">Breakeven</button>
+        <button class="btn-quick" id="btnSecure10" data-i18n="lock10">Lock 10%</button>
+        <button class="btn-quick" id="btnSecure30" data-i18n="lock30">Lock 30%</button>
       </div>
     </div>
   </div>
 
-  <button class="btn btn-neutral" id="btnShowPending">Pending Now</button>
-  <button class="btn btn-red" id="btnCancelFuture">Cancel Future</button>
+  <button class="btn btn-neutral" id="btnShowPending" data-i18n="pendingNow">Pending Now</button>
+  <button class="btn btn-red" id="btnCancelFuture" data-i18n="cancelFuture">Cancel Future</button>
 
   <div class="notice" id="notice"></div>
 </div>
 
 <script>
+  var translations = {
+    en: {
+      header: "Order Configuration",
+      instrument: "Instrument",
+      gold: "Gold",
+      custom: "Custom",
+      customInstrument: "Custom Instrument (send /findsymbol in the bot first to get the exact name)",
+      orderType: "Order Type",
+      marketOrders: "Market Orders",
+      futureOrders: "Future Orders",
+      futureRefPrice: "Future Reference Price",
+      buyStops: "Buy Stops",
+      sellStops: "Sell Stops",
+      firstDistance: "First Order Distance ($)",
+      spacing: "Order Spacing ($)",
+      sizingMode: "Position Size Mode",
+      fixedLot: "Fixed Lot",
+      riskPct: "Risk %",
+      lotSize: "Lot Size",
+      riskPerOrder: "Risk % per order",
+      noSl: "No Stop Loss",
+      noTp: "No Take Profit",
+      stopLoss: "Stop Loss ($)",
+      takeProfit: "Take Profit ($)",
+      killSwitch: "Kill Switch: opposite-side trigger count",
+      placeOrders: "Place Orders",
+      closeAll: "Close All Trades",
+      quickActions: "Quick Actions",
+      cancelPending: "Cancel Pending",
+      recenter: "Re-center Grid",
+      breakeven: "Breakeven",
+      lock10: "Lock 10%",
+      lock30: "Lock 30%",
+      pendingNow: "Pending Now",
+      cancelFuture: "Cancel Future",
+      previewNotice: "Preview mode - open this from the bot to actually send commands.",
+      confirmClose: "Cancel all pending orders and close all open positions for "
+    },
+    ar: {
+      header: "إعدادات الأمر",
+      instrument: "الأداة المالية",
+      gold: "الذهب",
+      custom: "مخصص",
+      customInstrument: "أداة مخصصة (أرسل /findsymbol في البوت أولاً للحصول على الاسم الدقيق)",
+      orderType: "نوع الأمر",
+      marketOrders: "أوامر السوق",
+      futureOrders: "أوامر مستقبلية",
+      futureRefPrice: "السعر المرجعي المستقبلي",
+      buyStops: "أوامر الشراء",
+      sellStops: "أوامر البيع",
+      firstDistance: "مسافة الأمر الأول ($)",
+      spacing: "التباعد بين الأوامر ($)",
+      sizingMode: "وضع حجم الصفقة",
+      fixedLot: "حجم ثابت",
+      riskPct: "نسبة المخاطرة %",
+      lotSize: "حجم اللوت",
+      riskPerOrder: "نسبة المخاطرة لكل أمر %",
+      noSl: "بدون وقف خسارة",
+      noTp: "بدون جني أرباح",
+      stopLoss: "وقف الخسارة ($)",
+      takeProfit: "جني الأرباح ($)",
+      killSwitch: "مفتاح الإيقاف: عدد التفعيلات المعاكسة",
+      placeOrders: "تنفيذ الأوامر",
+      closeAll: "إغلاق جميع الصفقات",
+      quickActions: "إجراءات سريعة",
+      cancelPending: "إلغاء الأوامر المعلقة",
+      recenter: "إعادة توسيط الشبكة",
+      breakeven: "التعادل",
+      lock10: "تثبيت 10%",
+      lock30: "تثبيت 30%",
+      pendingNow: "المعلق الآن",
+      cancelFuture: "إلغاء الأمر المستقبلي",
+      previewNotice: "وضع المعاينة - افتح هذه اللوحة من البوت لإرسال الأوامر فعليًا.",
+      confirmClose: "إلغاء جميع الأوامر المعلقة وإغلاق جميع الصفقات المفتوحة لـ "
+    }
+  };
+
+  var currentLang = 'en';
+  try { currentLang = localStorage.getItem('goldTraderLang') || 'en'; } catch(e){}
+
+  function applyLanguage(lang){
+    currentLang = lang;
+    try { localStorage.setItem('goldTraderLang', lang); } catch(e){}
+    document.documentElement.setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr');
+    document.documentElement.setAttribute('lang', lang);
+    document.querySelectorAll('[data-i18n]').forEach(function(el){
+      var key = el.getAttribute('data-i18n');
+      if(translations[lang][key]) el.textContent = translations[lang][key];
+    });
+    document.getElementById('langEn').classList.toggle('active', lang === 'en');
+    document.getElementById('langAr').classList.toggle('active', lang === 'ar');
+    if(!tg) document.getElementById('notice').textContent = translations[lang].previewNotice;
+  }
+  document.getElementById('langEn').addEventListener('click', function(){ applyLanguage('en'); });
+  document.getElementById('langAr').addEventListener('click', function(){ applyLanguage('ar'); });
+
   var tg = (window.Telegram && window.Telegram.WebApp) ? window.Telegram.WebApp : null;
   if (tg) { tg.ready(); tg.expand(); }
-  else { document.getElementById('notice').textContent = 'Preview mode - open this from the bot to actually send commands.'; }
+
+  applyLanguage(currentLang);
 
   // Prefill from the query string the bot builds (?symbol=...&buystops=...&etc)
   var params = new URLSearchParams(window.location.search);
@@ -321,7 +436,7 @@
   });
 
   document.getElementById('btnCloseAll').addEventListener('click', function(){
-    if(confirm('Cancel all pending orders and close all open positions for ' + getSymbolValue() + '?')) sendAction({action:'closeall', symbol: getSymbolValue(), maxoppositefills: num('killswitchcount')});
+    if(confirm(translations[currentLang].confirmClose + getSymbolValue() + '?')) sendAction({action:'closeall', symbol: getSymbolValue(), maxoppositefills: num('killswitchcount')});
   });
   document.getElementById('btnCancelPending').addEventListener('click', function(){
     sendAction({action:'cancelpending', symbol: getSymbolValue(), maxoppositefills: num('killswitchcount')});
