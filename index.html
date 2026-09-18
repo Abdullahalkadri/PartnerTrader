@@ -126,6 +126,18 @@
     text-align:center;
     margin-top:14px;
   }
+  .trigger-section{margin-top:14px;}
+  .trigger-row{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:8px;
+    padding:10px;
+    margin-bottom:8px;
+  }
+  .trigger-row label{margin-bottom:8px;}
+  .trigger-controls{display:flex;gap:8px;align-items:center;}
+  .trigger-controls input{flex:1 1 auto;min-width:0;}
+  .trigger-controls button{flex:0 0 auto;width:auto;margin-top:0;padding:10px 14px;font-size:13px;}
 </style>
 </head>
 <body>
@@ -213,6 +225,11 @@
 
   <button class="btn btn-green" id="btnPlace" data-i18n="placeOrders">Place Orders</button>
 
+  <div class="trigger-section" id="triggerSection" style="display:none;">
+    <div class="quick-title" data-i18n="armedTriggers">Armed Triggers</div>
+    <div id="triggersList"></div>
+  </div>
+
   <div id="marketOnlyActions">
     <button class="btn btn-red" id="btnCloseAll" data-i18n="closeAll">Close All Trades</button>
 
@@ -227,11 +244,12 @@
         <button class="btn-quick" id="btnSecure10" data-i18n="lock10">Lock 10%</button>
         <button class="btn-quick" id="btnSecure30" data-i18n="lock30">Lock 30%</button>
       </div>
+      <div class="quick-row" style="grid-template-columns:1fr 1fr;">
+        <input type="number" step="0.1" id="custompercent" value="15" dir="ltr" style="width:100%;">
+        <button class="btn-quick" id="btnSecureCustom" data-i18n="secureCustom">Secure Custom %</button>
+      </div>
     </div>
   </div>
-
-  <button class="btn btn-neutral" id="btnShowPending" data-i18n="pendingNow">Pending Now</button>
-  <button class="btn btn-red" id="btnCancelFuture" data-i18n="cancelFuture">Cancel Future</button>
 
   <div class="notice" id="notice"></div>
 </div>
@@ -272,6 +290,13 @@
       lock30: "Lock 30%",
       pendingNow: "Pending Now",
       cancelFuture: "Cancel Future",
+      secureCustom: "Secure Custom %",
+      armedTriggers: "Armed Triggers",
+      dropsTo: "Fires when price drops to",
+      risesTo: "Fires when price rises to",
+      updateBtn: "Update",
+      cancelBtn: "Cancel",
+      noTriggers: "No armed triggers for this instrument.",
       previewNotice: "Preview mode - open this from the bot to actually send commands.",
       confirmClose: "Cancel all pending orders and close all open positions for "
     },
@@ -309,6 +334,13 @@
       lock30: "تثبيت 30%",
       pendingNow: "المعلق الآن",
       cancelFuture: "إلغاء الأمر المستقبلي",
+      secureCustom: "تأمين نسبة مخصصة %",
+      armedTriggers: "الأوامر المستقبلية المفعّلة",
+      dropsTo: "يُنفَّذ عندما ينخفض السعر إلى",
+      risesTo: "يُنفَّذ عندما يرتفع السعر إلى",
+      updateBtn: "تحديث",
+      cancelBtn: "إلغاء",
+      noTriggers: "لا توجد أوامر مستقبلية مفعّلة لهذه الأداة.",
       previewNotice: "وضع المعاينة - افتح هذه اللوحة من البوت لإرسال الأوامر فعليًا.",
       confirmClose: "إلغاء جميع الأوامر المعلقة وإغلاق جميع الصفقات المفتوحة لـ "
     }
@@ -330,8 +362,8 @@
     document.getElementById('langAr').classList.toggle('active', lang === 'ar');
     if(!tg) document.getElementById('notice').textContent = translations[lang].previewNotice;
   }
-  document.getElementById('langEn').addEventListener('click', function(){ applyLanguage('en'); });
-  document.getElementById('langAr').addEventListener('click', function(){ applyLanguage('ar'); });
+  document.getElementById('langEn').addEventListener('click', function(){ applyLanguage('en'); if(typeof renderTriggersList === 'function') renderTriggersList(); });
+  document.getElementById('langAr').addEventListener('click', function(){ applyLanguage('ar'); if(typeof renderTriggersList === 'function') renderTriggersList(); });
 
   var tg = (window.Telegram && window.Telegram.WebApp) ? window.Telegram.WebApp : null;
   if (tg) { tg.ready(); tg.expand(); }
@@ -356,6 +388,54 @@
   setVal('slamount','slamount','5');
   setVal('tpamount','tpamount','5');
   setVal('killswitchcount','maxoppositefills','3');
+
+  // Armed future triggers for this instrument, as sent by the bot: "id:price:dir,id:price:dir,..."
+  var triggersParam = params.get('triggers') || '';
+  var armedTriggers = triggersParam.split(',').filter(Boolean).map(function(t){
+    var parts = t.split(':');
+    return { id: parts[0], price: parts[1], dir: parts[2] };
+  });
+
+  function renderTriggersList(){
+    var container = document.getElementById('triggersList');
+    if(!container) return;
+    container.innerHTML = '';
+    if(armedTriggers.length === 0){
+      var p = document.createElement('div');
+      p.className = 'notice';
+      p.style.textAlign = 'left';
+      p.textContent = translations[currentLang].noTriggers;
+      container.appendChild(p);
+      return;
+    }
+    armedTriggers.forEach(function(trig){
+      var row = document.createElement('div');
+      row.className = 'trigger-row';
+      var dirLabel = (trig.dir === 'drop') ? translations[currentLang].dropsTo : translations[currentLang].risesTo;
+      var priceInputId = 'trigPrice_' + trig.id;
+      row.innerHTML =
+        '<label>#' + trig.id + ' - ' + dirLabel + '</label>' +
+        '<div class="trigger-controls">' +
+          '<input type="number" step="0.01" dir="ltr" id="' + priceInputId + '" value="' + trig.price + '">' +
+          '<button type="button" class="btn-quick trig-update" data-id="' + trig.id + '">' + translations[currentLang].updateBtn + '</button>' +
+          '<button type="button" class="btn-quick trig-cancel" data-id="' + trig.id + '" style="background:var(--red);color:#fff;">' + translations[currentLang].cancelBtn + '</button>' +
+        '</div>';
+      container.appendChild(row);
+    });
+    container.querySelectorAll('.trig-update').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var id = btn.dataset.id;
+        var priceInput = document.getElementById('trigPrice_' + id);
+        sendAction({action:'updatetrigger', symbol: getSymbolValue(), triggerid: id, triggerprice: parseFloat(priceInput.value) || 0});
+      });
+    });
+    container.querySelectorAll('.trig-cancel').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        sendAction({action:'deletetrigger', symbol: getSymbolValue(), triggerid: btn.dataset.id});
+      });
+    });
+  }
+  renderTriggersList();
 
   // Instrument: Gold / US100 / Custom - whichever the bot last remembered gets pre-selected
   var incomingSymbol = params.get('symbol') || 'XAUUSD';
@@ -390,8 +470,7 @@
     document.getElementById('slField').style.display = document.getElementById('noSl').checked ? 'none' : 'block';
     document.getElementById('tpField').style.display = document.getElementById('noTp').checked ? 'none' : 'block';
     document.getElementById('customSymbolField').style.display = (groupValues.instrument === 'custom') ? 'block' : 'none';
-    document.getElementById('btnShowPending').style.display = (groupValues.mode === 'future') ? 'block' : 'none';
-    document.getElementById('btnCancelFuture').style.display = (groupValues.mode === 'future') ? 'block' : 'none';
+    document.getElementById('triggerSection').style.display = (groupValues.mode === 'future') ? 'block' : 'none';
     document.getElementById('marketOnlyActions').style.display = (groupValues.mode === 'market') ? 'block' : 'none';
     updateSymbolTitle();
   }
@@ -453,11 +532,8 @@
   document.getElementById('btnSecure30').addEventListener('click', function(){
     sendAction({action:'secure30', symbol: getSymbolValue(), maxoppositefills: num('killswitchcount')});
   });
-  document.getElementById('btnShowPending').addEventListener('click', function(){
-    sendAction({action:'showpending', symbol: getSymbolValue()});
-  });
-  document.getElementById('btnCancelFuture').addEventListener('click', function(){
-    sendAction({action:'cancelfuture', symbol: getSymbolValue()});
+  document.getElementById('btnSecureCustom').addEventListener('click', function(){
+    sendAction({action:'securecustom', symbol: getSymbolValue(), custompercent: num('custompercent'), maxoppositefills: num('killswitchcount')});
   });
 </script>
 </body>
