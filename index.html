@@ -280,8 +280,11 @@
   function num(id){ return parseFloat(document.getElementById(id).value) || 0; }
   function str(id){ return document.getElementById(id).value.trim(); }
 
+  var alreadySubmitting = false;
   function sendAction(payload){
-    if(!tg){ alert('Open this panel from the Telegram bot to send commands.'); return; }
+    if(alreadySubmitting) return; // blocks a double-tap from sending the same action twice
+    alreadySubmitting = true;
+    if(!tg){ alert('Open this panel from the Telegram bot to send commands.'); alreadySubmitting = false; return; }
     tg.sendData(JSON.stringify(payload));
     tg.close();
   }
