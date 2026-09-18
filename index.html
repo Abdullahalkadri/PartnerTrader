@@ -94,6 +94,7 @@
   }
   .btn-green{background:var(--green);}
   .btn-red{background:var(--red);}
+  .btn-neutral{background:var(--gold);color:var(--gold-text);}
   .quick-actions{margin-top:22px;border-top:1px solid var(--border);padding-top:14px;}
   .quick-title{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;}
   .quick-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;}
@@ -193,25 +194,26 @@
   </div>
 
   <button class="btn btn-green" id="btnPlace">Place Orders</button>
-  <button class="btn btn-red" id="btnCloseAll">Close All Trades</button>
 
-  <div class="quick-actions">
-    <div class="quick-title">Quick Actions</div>
-    <div class="quick-row">
-      <button class="btn-quick" id="btnCancelPending">Cancel Pending</button>
-      <button class="btn-quick" id="btnRecenter">Re-center Grid</button>
-    </div>
-    <div class="quick-row" style="grid-template-columns:1fr 1fr 1fr;">
-      <button class="btn-quick" id="btnSecureBE">Breakeven</button>
-      <button class="btn-quick" id="btnSecure10">Lock 10%</button>
-      <button class="btn-quick" id="btnSecure30">Lock 30%</button>
-    </div>
-    <div class="quick-title" style="margin-top:14px;">Future Market</div>
-    <div class="quick-row">
-      <button class="btn-quick" id="btnShowPending">Pending Now</button>
-      <button class="btn-quick" id="btnCancelFuture">Cancel Future</button>
+  <div id="marketOnlyActions">
+    <button class="btn btn-red" id="btnCloseAll">Close All Trades</button>
+
+    <div class="quick-actions">
+      <div class="quick-title">Quick Actions</div>
+      <div class="quick-row">
+        <button class="btn-quick" id="btnCancelPending">Cancel Pending</button>
+        <button class="btn-quick" id="btnRecenter">Re-center Grid</button>
+      </div>
+      <div class="quick-row" style="grid-template-columns:1fr 1fr 1fr;">
+        <button class="btn-quick" id="btnSecureBE">Breakeven</button>
+        <button class="btn-quick" id="btnSecure10">Lock 10%</button>
+        <button class="btn-quick" id="btnSecure30">Lock 30%</button>
+      </div>
     </div>
   </div>
+
+  <button class="btn btn-neutral" id="btnShowPending">Pending Now</button>
+  <button class="btn btn-red" id="btnCancelFuture">Cancel Future</button>
 
   <div class="notice" id="notice"></div>
 </div>
@@ -273,6 +275,9 @@
     document.getElementById('slField').style.display = document.getElementById('noSl').checked ? 'none' : 'block';
     document.getElementById('tpField').style.display = document.getElementById('noTp').checked ? 'none' : 'block';
     document.getElementById('customSymbolField').style.display = (groupValues.instrument === 'custom') ? 'block' : 'none';
+    document.getElementById('btnShowPending').style.display = (groupValues.mode === 'future') ? 'block' : 'none';
+    document.getElementById('btnCancelFuture').style.display = (groupValues.mode === 'future') ? 'block' : 'none';
+    document.getElementById('marketOnlyActions').style.display = (groupValues.mode === 'market') ? 'block' : 'none';
     updateSymbolTitle();
   }
   // Pre-set checkboxes from query string (sl=true means stop loss IS enabled -> "No Stop Loss" unchecked)
