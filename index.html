@@ -138,6 +138,24 @@
   .trigger-controls{display:flex;gap:8px;align-items:center;}
   .trigger-controls input{flex:1 1 auto;min-width:0;}
   .trigger-controls button{flex:0 0 auto;width:auto;margin-top:0;padding:10px 14px;font-size:13px;}
+  .suggestions-list{
+    margin-top:6px;
+    max-height:180px;
+    overflow-y:auto;
+    border:1px solid var(--border);
+    border-radius:6px;
+    background:var(--card);
+    display:none;
+  }
+  .suggestions-list.show{display:block;}
+  .suggestion-item{
+    padding:10px 12px;
+    font-size:14px;
+    cursor:pointer;
+    border-bottom:1px solid var(--border);
+  }
+  .suggestion-item:last-child{border-bottom:none;}
+  .suggestion-item:hover, .suggestion-item.highlighted{background:var(--gold);color:var(--gold-text);}
 </style>
 </head>
 <body>
@@ -158,8 +176,9 @@
     </div>
   </div>
   <div class="field" id="customSymbolField" style="display:none;">
-    <label data-i18n="customInstrument">Custom Instrument (send /findsymbol in the bot first to get the exact name)</label>
-    <input type="text" id="customSymbol" value="" dir="ltr">
+    <label data-i18n="customInstrumentLabel">Custom Instrument</label>
+    <input type="text" id="customSymbol" value="" dir="ltr" autocomplete="off">
+    <div id="symbolSuggestions" class="suggestions-list"></div>
   </div>
 
   <div class="field">
@@ -262,7 +281,8 @@
       instrument: "Instrument",
       gold: "Gold",
       custom: "Custom",
-      customInstrument: "Custom Instrument (send /findsymbol in the bot first to get the exact name)",
+      customInstrumentLabel: "Custom Instrument (type to search)",
+      noSuggestions: "No matches - check the spelling or try a shorter search.",
       orderType: "Order Type",
       marketOrders: "Market Orders",
       futureOrders: "Future Orders",
@@ -307,7 +327,8 @@
       instrument: "الأداة المالية",
       gold: "الذهب",
       custom: "مخصص",
-      customInstrument: "أداة مخصصة (أرسل /findsymbol في البوت أولاً للحصول على الاسم الدقيق)",
+      customInstrumentLabel: "أداة مخصصة (اكتب للبحث)",
+      noSuggestions: "لا توجد نتائج مطابقة - تحقق من الإملاء أو جرّب بحثًا أقصر.",
       orderType: "نوع الأمر",
       marketOrders: "أوامر السوق",
       futureOrders: "أوامر مستقبلية",
@@ -452,6 +473,47 @@
     document.getElementById('symbolTitle').textContent = getSymbolValue().toUpperCase();
   }
   document.getElementById('customSymbol').addEventListener('input', updateSymbolTitle);
+
+  // Live-filtered suggestions from the broker's full symbol list, sent by the bot when the panel opened
+  var allSymbolsParam = params.get('allsymbols') || '';
+  var allSymbols = allSymbolsParam.split(',').filter(Boolean);
+
+  var suggestBox = document.getElementById('symbolSuggestions');
+  var highlightedIndex = -1;
+
+  function renderSuggestions(matches){
+    suggestBox.innerHTML = '';
+    highlightedIndex = -1;
+    if(matches.length === 0){
+      suggestBox.classList.remove('show');
+      return;
+    }
+    matches.slice(0, 8).forEach(function(sym){
+      var item = document.createElement('div');
+      item.className = 'suggestion-item';
+      item.textContent = sym;
+      item.addEventListener('click', function(){
+        document.getElementById('customSymbol').value = sym;
+        updateSymbolTitle();
+        suggestBox.classList.remove('show');
+        suggestBox.innerHTML = '';
+      });
+      suggestBox.appendChild(item);
+    });
+    suggestBox.classList.add('show');
+  }
+
+  document.getElementById('customSymbol').addEventListener('input', function(){
+    var query = this.value.trim().toUpperCase();
+    if(query.length === 0){ suggestBox.classList.remove('show'); suggestBox.innerHTML = ''; return; }
+    var matches = allSymbols.filter(function(sym){ return sym.toUpperCase().indexOf(query) >= 0; });
+    renderSuggestions(matches);
+  });
+  document.addEventListener('click', function(e){
+    if(e.target.id !== 'customSymbol' && !suggestBox.contains(e.target)){
+      suggestBox.classList.remove('show');
+    }
+  });
 
   // Toggle button groups (Instrument / Order Type / Position Size Mode)
   var groupValues = { instrument: instrumentChoice, mode: params.get('mode') || 'market', sizing: params.get('sizing') || 'fixed' };
