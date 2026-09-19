@@ -245,7 +245,7 @@
   <button class="btn btn-green" id="btnPlace" data-i18n="placeOrders">Place Orders</button>
 
   <div class="trigger-section" id="triggerSection" style="display:none;">
-    <div class="quick-title" data-i18n="armedTriggers">Armed Triggers</div>
+    <div class="quick-title"><span data-i18n="armedTriggers">Armed Triggers</span> &mdash; <span id="triggerInstrumentName"></span></div>
     <div id="triggersList"></div>
   </div>
 
@@ -432,13 +432,15 @@
       container.appendChild(p);
       return;
     }
+    var headerNameEl = document.getElementById('triggerInstrumentName');
+    if(headerNameEl) headerNameEl.textContent = incomingSymbol;
     armedTriggers.forEach(function(trig){
       var row = document.createElement('div');
       row.className = 'trigger-row';
       var dirLabel = (trig.dir === 'drop') ? translations[currentLang].dropsTo : translations[currentLang].risesTo;
       var priceInputId = 'trigPrice_' + trig.id;
       row.innerHTML =
-        '<label>#' + trig.id + ' - ' + dirLabel + '</label>' +
+        '<label>' + incomingSymbol + ' #' + trig.id + ' - ' + dirLabel + '</label>' +
         '<div class="trigger-controls">' +
           '<input type="number" step="0.01" dir="ltr" id="' + priceInputId + '" value="' + trig.price + '">' +
           '<button type="button" class="btn-quick trig-update" data-id="' + trig.id + '">' + translations[currentLang].updateBtn + '</button>' +
@@ -459,12 +461,12 @@
       });
     });
   }
-  renderTriggersList();
 
   // Instrument: Gold / US100 / Custom - whichever the bot last remembered gets pre-selected
   var incomingSymbol = params.get('symbol') || 'XAUUSD';
   var instrumentChoice = (incomingSymbol === 'XAUUSD' || incomingSymbol === 'US100') ? incomingSymbol : 'custom';
   if(instrumentChoice === 'custom') document.getElementById('customSymbol').value = incomingSymbol;
+  renderTriggersList();
 
   function getSymbolValue(){
     return (groupValues.instrument === 'custom') ? str('customSymbol') : groupValues.instrument;
