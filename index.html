@@ -182,6 +182,14 @@
   </div>
 
   <div class="field">
+    <label data-i18n="orderStyle">Order Style</label>
+    <div class="toggle-row">
+      <button type="button" class="toggle-btn active" data-group="orderstyle" data-value="stop" data-i18n="stopOrders">Stop Orders</button>
+      <button type="button" class="toggle-btn" data-group="orderstyle" data-value="limit" data-i18n="limitOrders">Limit Orders</button>
+    </div>
+  </div>
+
+  <div class="field">
     <label data-i18n="orderType">Order Type</label>
     <div class="toggle-row">
       <button type="button" class="toggle-btn active" data-group="mode" data-value="market" data-i18n="marketOrders">Market Orders</button>
@@ -283,6 +291,9 @@
       custom: "Custom",
       customInstrumentLabel: "Custom Instrument (type to search)",
       noSuggestions: "No matches - check the spelling or try a shorter search.",
+      orderStyle: "Order Style",
+      stopOrders: "Stop Orders",
+      limitOrders: "Limit Orders",
       orderType: "Order Type",
       marketOrders: "Market Orders",
       futureOrders: "Future Orders",
@@ -329,6 +340,9 @@
       custom: "مخصص",
       customInstrumentLabel: "أداة مخصصة (اكتب للبحث)",
       noSuggestions: "لا توجد نتائج مطابقة - تحقق من الإملاء أو جرّب بحثًا أقصر.",
+      orderStyle: "أسلوب الأمر",
+      stopOrders: "أوامر إيقاف (Stop)",
+      limitOrders: "أوامر حد (Limit)",
       orderType: "نوع الأمر",
       marketOrders: "أوامر السوق",
       futureOrders: "أوامر مستقبلية",
@@ -518,7 +532,7 @@
   });
 
   // Toggle button groups (Instrument / Order Type / Position Size Mode)
-  var groupValues = { instrument: instrumentChoice, mode: params.get('mode') || 'market', sizing: params.get('sizing') || 'fixed' };
+  var groupValues = { instrument: instrumentChoice, mode: params.get('mode') || 'market', sizing: params.get('sizing') || 'fixed', orderstyle: params.get('orderstyle') || 'stop' };
   document.querySelectorAll('.toggle-btn').forEach(function(btn){
     var group = btn.dataset.group, value = btn.dataset.value;
     if(groupValues[group] === value) btn.classList.add('active'); else btn.classList.remove('active');
@@ -565,6 +579,7 @@
       action: 'place',
       symbol: getSymbolValue(),
       mode: groupValues.mode,
+      orderstyle: groupValues.orderstyle,
       futureprice: num('futureprice'),
       buystops: num('buystops'),
       sellstops: num('sellstops'),
